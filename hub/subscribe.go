@@ -12,11 +12,11 @@ import (
 )
 
 type subscription struct {
-	ID     string `json:"@id"`
-	Type   string `json:"@type"`
-	Topic  string `json:"topic"`
-	Active bool   `json:"active"`
-	mercureClaim
+	ID      string      `json:"@id"`
+	Type    string      `json:"@type"`
+	Topic   string      `json:"topic"`
+	Active  bool        `json:"active"`
+	Payload interface{} `json:"payload,omitempty"`
 }
 
 // SubscribeHandler creates a keep alive connection and sends the events to the subscribers.
@@ -200,14 +200,8 @@ func (h *Hub) dispatchSubscriptionUpdate(s *Subscriber, active bool) {
 			Active: active,
 		}
 
-		if s.Claims != nil {
-			connection.mercureClaim = s.Claims.Mercure
-		}
-		if s.Claims == nil || connection.mercureClaim.Publish == nil {
-			connection.mercureClaim.Publish = []string{}
-		}
-		if s.Claims == nil || connection.mercureClaim.Subscribe == nil {
-			connection.mercureClaim.Subscribe = []string{}
+		if s.Claims != nil && s.Claims.Mercure.Payload != nil {
+			connection.Payload = s.Claims.Mercure.Payload
 		}
 
 		json, err := json.MarshalIndent(connection, "", "  ")
